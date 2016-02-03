@@ -1,3 +1,5 @@
+rm out.txt
+
 javac FbClass.java
 # Compile the ASM_Example class
 javac -cp asm-all-5.0.4.jar ASM_Example.java
