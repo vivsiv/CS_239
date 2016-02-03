@@ -8,6 +8,7 @@ mv FbClass_new.class FbClass.class
 java -cp asm-all-5.0.4.jar:. ASM_Example myClass.class myClass_new.class
 mv myClass_new.class myClass.class
 # Run the newly generated myClass class
-java -cp . myClass
+touch out.txt
+java -cp . myClass > out.txt
 # Remove all class files
 rm *.class
