@@ -24,6 +24,12 @@ class Node:
 	# 	for node in children:
 	# 	self.root = node
 
+def has_root(node_name,root_arr):
+	for r in root_arr:
+		if node_name == r.name:
+			return r
+	return None
+
 print "Building Tree..."
 roots = []
 root = None
@@ -45,19 +51,25 @@ for line in open('out.txt', 'r'):
 				root.add_child(child)
 				print_str += "<" + str(level) + ">: (" + str(child.num_calls) + ")" + child.name + " Parent: " + child.parent.name
 				root = child
-			print print_str
+			#print print_str
 			
 		else:
 			name = (line.split("$$")[1]).rstrip()
-			root = Node(name,1,None,[])
-			roots.append(root)
-			print_str = "<" + str(level) + ">: (" + str(root.num_calls) + ")" + root.name
-			print print_str
+			prev_root = has_root(name, roots)
+			if prev_root != None:
+				prev_root.num_calls += 1
+				print_str = "<" + str(level) + ">: (" + str(prev_root.num_calls) + ")" + prev_root.name
+				root = prev_root
+			else:
+				root = Node(name,1,None,[])
+				roots.append(root)
+				print_str = "<" + str(level) + ">: (" + str(root.num_calls) + ")" + root.name
+			#print print_str
 		level += 1
-	else :
-		#print "<Leave>:" + root.name + " num_calls: " + str(root.num_calls)
+	elif "[Call end]" in line :
 		root = root.parent
 		level -= 1
+
 print "Tree Built!"
 print ""
 
@@ -83,17 +95,3 @@ for node in roots:
 print "Tree Parsed"
 
 
-# num_tabs = 0
-# for line in open('out.txt', 'r'):
-# 	if ('[Call end]' in line):
-# 		num_tabs -= 1
-
-# 	line_string = ""
-# 	for i in range(0,num_tabs):
-# 		line_string += "\t"
-
-# 	line_string += line.split("$$")[1]
-# 	print line_string.rstrip()
-
-# 	if ('[Call begin]' in line): 
-# 		num_tabs += 1
