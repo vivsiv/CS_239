@@ -23,17 +23,21 @@ root = None
 level = 0
 for line in open('out.txt', 'r'):
 	if "[Call begin]" in line:
+		print_str = ""
+		for i in range (0,level):
+			print_str += "\t"
 		if root:
 			name = (line.split("$$")[1]).rstrip()
 			child = Node(name,1,root,[])
 			root.add_child(child)
-			#for child in root.children:
-			print "<" + str(level) + ">: " + child.name + " num_calls: " + str(child.num_calls) + " Parent: " + child.parent.name
+			print_str += "<" + str(level) + ">: " + child.name + " num_calls: " + str(child.num_calls) + " Parent: " + child.parent.name
+			print print_str
 			root = child
 		else:
 			name = (line.split("$$")[1]).rstrip()
 			root = Node(name,1,None,[])
-			print "<" + str(level) + ">:" + root.name + " num_calls: " + str(root.num_calls)
+			print_str = "<" + str(level) + ">:" + root.name + " num_calls: " + str(root.num_calls)
+			print print_str
 		level += 1
 	else :
 		#print "<Leave>:" + root.name + " num_calls: " + str(root.num_calls)
