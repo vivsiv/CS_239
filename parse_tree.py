@@ -18,7 +18,7 @@ class Node:
 	# 	for node in children:
 	# 	self.root = node
 
-
+print "Building Tree..."
 root = None
 level = 0
 for line in open('out.txt', 'r'):
@@ -30,19 +30,20 @@ for line in open('out.txt', 'r'):
 			name = (line.split("$$")[1]).rstrip()
 			child = Node(name,1,root,[])
 			root.add_child(child)
-			print_str += "<" + str(level) + ">: " + child.name + " num_calls: " + str(child.num_calls) + " Parent: " + child.parent.name
+			print_str += "<" + str(level) + ">: " + child.name + " Parent: " + child.parent.name
 			print print_str
 			root = child
 		else:
 			name = (line.split("$$")[1]).rstrip()
 			root = Node(name,1,None,[])
-			print_str = "<" + str(level) + ">:" + root.name + " num_calls: " + str(root.num_calls)
+			print_str = "<" + str(level) + ">:" + root.name
 			print print_str
 		level += 1
 	else :
 		#print "<Leave>:" + root.name + " num_calls: " + str(root.num_calls)
 		root = root.parent
 		level -= 1
+print "Tree Built!"
 
 
 # num_tabs = 0
