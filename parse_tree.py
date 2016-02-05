@@ -1,39 +1,57 @@
-# class Node:
-# 	def __init__(self,name,num_calls,parent,children):
-# 		self.name = name
-# 		self.num_calls = num_calls
-# 		self.children = children
+class Node:
+	def __init__(self,name,num_calls,parent,children):
+		self.name = name
+		self.num_calls = num_calls
+		self.parent = parent
+		self.children = children
 
-# 	def add_child(child):
-# 		self.children.append(child)
+	def add_child(self,child):
+		self.children.append(child)
 
-# 	def addNode(name):
-# 		for node in children:
-# 		self.root = node
+	def node_string(self):
+		ns = "<Node>:" + self.name + " calls:" + str(self.num_calls)
+		if self.parent:
+			ns += (" parent:" + self.parent.name)
+		return ns
+
+	# def addNode(name):
+	# 	for node in children:
+	# 	self.root = node
 
 
-# f = open('out.text','r')
-# text = f.readline()
-# tree = 
-num_tabs = 0
+root = None
+level = 0
 for line in open('out.txt', 'r'):
-	if ('[Call end]' in line):
-		num_tabs -= 1
-		
-	line_string = ""
-	for i in range(0,num_tabs):
-		line_string += "\t"
+	if "[Call begin]" in line:
+		if root:
+			name = (line.split("$$")[1]).rstrip()
+			child = Node(name,1,root,[])
+			root.add_child(child)
+			#for child in root.children:
+			print "<" + str(level) + ">: " + child.name + " num_calls: " + str(child.num_calls) + " Parent: " + child.parent.name
+			root = child
+		else:
+			name = (line.split("$$")[1]).rstrip()
+			root = Node(name,1,None,[])
+			print "<" + str(level) + ">:" + root.name + " num_calls: " + str(root.num_calls)
+		level += 1
+	else :
+		#print "<Leave>:" + root.name + " num_calls: " + str(root.num_calls)
+		root = root.parent
+		level -= 1
 
-	line_string += line
-	print line_string
 
-	if ('[Call begin]' in line): 
-		num_tabs += 1
-	
+# num_tabs = 0
+# for line in open('out.txt', 'r'):
+# 	if ('[Call end]' in line):
+# 		num_tabs -= 1
 
-	# line_string = ""
-	# for i in range(0,num_tabs):
-	# 	line_string += "\t"
+# 	line_string = ""
+# 	for i in range(0,num_tabs):
+# 		line_string += "\t"
 
-	# line_string += line
-	# print line_string
+# 	line_string += line.split("$$")[1]
+# 	print line_string.rstrip()
+
+# 	if ('[Call begin]' in line): 
+# 		num_tabs += 1

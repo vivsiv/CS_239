@@ -57,7 +57,7 @@ class MyMethodVisitor extends MethodVisitor implements Opcodes {
 		// print "[Call begin] ..."
 		// use ASMifier to generate instrumentation code for your need
 		mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
-		mv.visitLdcInsn("[Call begin] " + owner + "::" + name);
+		mv.visitLdcInsn("[Call begin]$$" + owner + "::" + name);
 		mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
 		//********************************************************************************
 
@@ -66,7 +66,7 @@ class MyMethodVisitor extends MethodVisitor implements Opcodes {
 		//********************************************************************************
 		// print "[Call end] ..."
 		mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
-		mv.visitLdcInsn("[Call end] " + owner + "::" + name);
+		mv.visitLdcInsn("[Call end]$$" + owner + "::" + name);
 		mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
 		//********************************************************************************
 	}
