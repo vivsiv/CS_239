@@ -86,7 +86,7 @@ for r in roots:
 	print r.name
 print ""
 
-def dfs(node, level, csvwriter):
+def dfs(node, level, call_stack, csvwriter):
 	if node == None:
 		return
  	print_str = ""
@@ -94,21 +94,21 @@ def dfs(node, level, csvwriter):
 		print_str += "\t"
 	print_str += node.node_string(level)
 	print print_str
-	csv_row = [node.name,node.num_calls,node.avg_ex_time]
+	csv_row = [node.name,node.num_calls,node.avg_ex_time,call_stack]
 	if node.parent != None:
 		csv_row.append(node.parent.name)
 	else:
 		csv_row.append("None")
 	csvwriter.writerow(csv_row)
 	for child in node.children:
-		dfs(child, level+1, csvwriter)
+		dfs(child, level+1, call_stack, csvwriter)
 
 print "Parsing Tree..."
 with open('inst/tree_data.csv', 'wb') as csvfile:
 	treewriter = csv.writer(csvfile, quotechar='"')
-	treewriter.writerow(['Function Name','Num Calls','Avg Execution Time','Parent Name'])
+	treewriter.writerow(['Function Name','Num Calls','Avg Execution Time','Call Stack','Parent Name'])
 	for node in roots:
-		dfs(node,0,treewriter)
+		dfs(node,0,node.name,treewriter)
 print "Tree Parsed"
 
 
