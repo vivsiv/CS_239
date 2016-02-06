@@ -89,11 +89,13 @@ print ""
 def dfs(node, level, call_stack, csvwriter):
 	if node == None:
 		return
+
  	print_str = ""
 	for i in range (0,level):
 		print_str += "\t"
 	print_str += node.node_string(level)
 	print print_str
+
 	csv_row = ["<L" + str(level) + ">" + node.name,node.num_calls,node.avg_ex_time_us(),call_stack]
 	if node.parent != None:
 		csv_row.append("<L" + str(level - 1) + ">" + node.parent.name)
@@ -101,11 +103,13 @@ def dfs(node, level, call_stack, csvwriter):
 		csv_row.append("None")
 	csv_row.append(len(node.children))
 	csvwriter.writerow(csv_row)
+	
 	for child in node.children:
 		dfs(child, level+1, call_stack, csvwriter)
 
+csv_out = sys.argv[2]
 print "Parsing Tree..."
-with open('inst/tree_data.csv', 'wb') as csvfile:
+with open(csv_out, 'wb') as csvfile:
 	treewriter = csv.writer(csvfile, quotechar='"')
 	treewriter.writerow(['Function Name','Num Calls','Avg Execution Time (usec)','Call Stack','Parent Name','Num Children'])
 	for node in roots:
