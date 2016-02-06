@@ -1,4 +1,5 @@
 import sys
+import csv
 class Node:
 	def __init__(self,name,num_calls,parent,children,start_time,avg_ex_time):
 		self.name = name
@@ -85,7 +86,7 @@ for r in roots:
 	print r.name
 print ""
 
-def dfs(node, level):
+def dfs(node, level, csvwriter):
 	if node == None:
 		return
  	print_str = ""
@@ -93,12 +94,21 @@ def dfs(node, level):
 		print_str += "\t"
 	print_str += node.node_string(level)
 	print print_str
+	csv_row = [node.name,node.num_calls,node.avg_ex_time]
+	if node.parent != None:
+		csv_row.append(node.parent.name)
+	else:
+		csv_row.append("None")
+	csvwriter.writerow(csv_row)
 	for child in node.children:
-		dfs(child, level+1)
+		dfs(child, level+1, csvwriter)
 
 print "Parsing Tree..."
-for node in roots:
-	dfs(node,0)
+with open('inst/tree_data.csv', 'wb') as csvfile:
+	treewriter = csv.writer(csvfile, quotechar='"')
+	treewriter.writerow(['Function Name','Num Calls','Avg Execution Time','Parent Name'])
+	for node in roots:
+		dfs(node,0,treewriter)
 print "Tree Parsed"
 
 
