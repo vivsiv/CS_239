@@ -13,7 +13,7 @@ class Node:
 		self.children.append(child)
 
 	def node_string(self,level):
-		return "<L" + str(level) + ">: (" + str(self.num_calls) + "x) " + self.name + " (" + str(self.avg_ex_time_ms()) + " ms) "
+		return "<L" + str(level) + ">: (" + str(self.num_calls) + "x) " + self.name + " (" + str(self.avg_ex_time_us()) + " us) "
 
 	def has_child(self,node_name):
 		for child in self.children:
@@ -25,7 +25,7 @@ class Node:
 		total_ex_time = (self.avg_ex_time * (self.num_calls - 1)) + new_time
 		self.avg_ex_time = total_ex_time / self.num_calls
 
-	def avg_ex_time_ms(self):
+	def avg_ex_time_us(self):
 		return self.avg_ex_time / 1000.0
 
 def has_root(node_name,root_arr):
@@ -94,9 +94,9 @@ def dfs(node, level, call_stack, csvwriter):
 		print_str += "\t"
 	print_str += node.node_string(level)
 	print print_str
-	csv_row = [node.name,node.num_calls,node.avg_ex_time,call_stack]
+	csv_row = ["<L" + str(level) + ">" + node.name,node.num_calls,node.avg_ex_time_us(),call_stack]
 	if node.parent != None:
-		csv_row.append(node.parent.name)
+		csv_row.append("<L" + str(level - 1) + ">" + node.parent.name)
 	else:
 		csv_row.append("None")
 	csvwriter.writerow(csv_row)
@@ -106,7 +106,7 @@ def dfs(node, level, call_stack, csvwriter):
 print "Parsing Tree..."
 with open('inst/tree_data.csv', 'wb') as csvfile:
 	treewriter = csv.writer(csvfile, quotechar='"')
-	treewriter.writerow(['Function Name','Num Calls','Avg Execution Time','Call Stack','Parent Name'])
+	treewriter.writerow(['Function Name','Num Calls','Avg Execution Time (usec)','Call Stack','Parent Name'])
 	for node in roots:
 		dfs(node,0,node.name,treewriter)
 print "Tree Parsed"
