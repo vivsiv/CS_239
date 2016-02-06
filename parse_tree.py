@@ -111,7 +111,7 @@ csv_out = sys.argv[2]
 print "Parsing Tree..."
 with open(csv_out, 'wb') as csvfile:
 	treewriter = csv.writer(csvfile, quotechar='"')
-	treewriter.writerow(['Function Name','Num Calls','Avg Execution Time (usec)','Call Stack','Parent Name','Num Children'])
+	treewriter.writerow(['Function_Name','Num_Calls','Avg_Execution_Time','Call_Stack','Parent_Name','Num_Children'])
 	for node in roots:
 		dfs(node,0,"<L0>"+node.name,treewriter)
 print "Tree Parsed"
