@@ -108,7 +108,7 @@ with open('inst/tree_data.csv', 'wb') as csvfile:
 	treewriter = csv.writer(csvfile, quotechar='"')
 	treewriter.writerow(['Function Name','Num Calls','Avg Execution Time (usec)','Call Stack','Parent Name'])
 	for node in roots:
-		dfs(node,0,node.name,treewriter)
+		dfs(node,0,"<L0>"+node.name,treewriter)
 print "Tree Parsed"
 
 
