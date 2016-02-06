@@ -7,8 +7,8 @@ all_files = os.listdir(".")
 old_class_files = [f for f in all_files if f.endswith(".class")]
 
 #Compile file to instrument
-#os.system('javac FbClass.java')
-os.system('javac SortingAlgorithms.java')
+os.system('javac FbClass.java')
+#os.system('javac SortingAlgorithms.java')
 
 for f in os.listdir(".") :
 	if (f.endswith(".class") and (not f in old_class_files)) :
@@ -25,8 +25,8 @@ for f in os.listdir(".") :
 		
 # Run the newly generated myClass class
 os.system('touch out.txt')
-#os.system('java -cp . myClass > out.txt')
-os.system('java -cp . SortingAlgorithms > out.txt')
+os.system('java -cp . myClass > out.txt')
+#os.system('java -cp . SortingAlgorithms > out.txt')
 # Remove all class files
 os.system('rm *.class')
 

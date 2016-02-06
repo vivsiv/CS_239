@@ -20,10 +20,6 @@ class Node:
 				return child
 		return None
 
-	# def addNode(name):
-	# 	for node in children:
-	# 	self.root = node
-
 def has_root(node_name,root_arr):
 	for r in root_arr:
 		if node_name == r.name:
