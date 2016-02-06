@@ -12,8 +12,11 @@ os.system('java -cp .:asm-all-5.0.4.jar ASM_Instrument_Tool u_inst inst')
 		
 # Run the newly generated myClass class
 os.system('touch inst/inst_out.txt')
-os.system('java -cp inst myClass > inst/inst_out.txt')
-#os.system('java -cp inst SortingAlgorithms > inst/out.txt')
+sample = sys.argv[1]
+if sample == "fb" :
+	os.system('java -cp inst myClass > inst/inst_out.txt')
+elif sample == "sort":
+	os.system('java -cp inst SortingAlgorithms > inst/inst_out.txt')
 
 # Remove all class files
 os.system('rm *.class')
