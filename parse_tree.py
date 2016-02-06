@@ -1,3 +1,4 @@
+import sys
 class Node:
 	def __init__(self,name,num_calls,parent,children,start_time,avg_ex_time):
 		self.name = name
@@ -36,7 +37,7 @@ print "Building Tree..."
 roots = []
 root = None
 level = 0
-for line in open('out.txt', 'r'):
+for line in open(sys.argv[1], 'r'):
 	if "[Call begin]" in line:
 		print_str = ""
 		for i in range (0,level):
