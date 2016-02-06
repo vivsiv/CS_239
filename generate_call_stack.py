@@ -1,7 +1,7 @@
 num_tabs = 0
 for line in open('out.txt', 'r'):
-	if ('[Call end]' in line) or ('[Call begin]' in line):
-		if ('[Call end]' in line):
+	if ('[Call  end ]' in line) or ('[Call begin]' in line):
+		if ('[Call  end ]' in line):
 			num_tabs -= 1
 
 		line_string = ""
