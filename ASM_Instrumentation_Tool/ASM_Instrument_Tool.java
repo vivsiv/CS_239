@@ -46,7 +46,7 @@ class ASM_Instrument_Tool {
 
 			ClassReader reader = new ClassReader(input_bytecode);
 			//TraceClassWriter writer = new TraceClassWriter(TraceClassWriter.COMPUTE_FRAMES, ASM_Instrument_Tool.class.getClassLoader());
-			ClassWriter writer = new ClassWriter(TraceClassWriter.COMPUTE_FRAMES);
+			ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
 
 			//********************************************************************************
 			// wrap ClassWriter using MyClassVisitor
