@@ -1,5 +1,6 @@
 import sys
 import csv
+import os
 class Node:
 	def __init__(self,name,num_calls,parent,children,start_time,avg_ex_time):
 		self.name = name
@@ -38,45 +39,49 @@ print "Building Tree..."
 roots = []
 root = None
 level = 0
-for line in open(sys.argv[1], 'r'):
-	if "[Call begin]" in line:
-		print_str = ""
-		for i in range (0,level):
-			print_str += "\t"
-		if root:
-			name = (line.split("$$")[2]).rstrip()
-			prev_child = root.has_child(name)
-			if prev_child != None:
-				prev_child.num_calls += 1
-				print_str += "<" + str(level) + ">: (" + str(prev_child.num_calls) + ")" + prev_child.name + " Parent: " + prev_child.parent.name
-				root = prev_child
-			else:
-				child = Node(name,1,root,[],0,0)
-				root.add_child(child)
-				print_str += "<" + str(level) + ">: (" + str(child.num_calls) + ")" + child.name + " Parent: " + child.parent.name
-				root = child
-			#print print_str
-			
-		else:
-			name = (line.split("$$")[2]).rstrip()
-			prev_root = has_root(name, roots)
-			if prev_root != None:
-				prev_root.num_calls += 1
-				print_str = "<" + str(level) + ">: (" + str(prev_root.num_calls) + ")" + prev_root.name
-				root = prev_root
-			else:
-				root = Node(name,1,None,[],0,0)
-				roots.append(root)
-				print_str = "<" + str(level) + ">: (" + str(root.num_calls) + ")" + root.name
-			#print print_str
-		root.start_time = float((line.split("$$")[1]).rstrip())
-		level += 1
-	elif "[Call  end ]" in line :
-		end_time = float((line.split("$$")[1]).rstrip())
-		new_ex_time = end_time - root.start_time
-		root.update_ex_time(new_ex_time)
-		root = root.parent
-		level -= 1
+inst_dir = sys.argv[1]
+for log_file in os.listdir(inst_dir):
+	if log_file.endswith(".txt"):
+		file_path = inst_dir + '/' + log_file
+		for line in open(file_path, 'r'):
+			if "[Call begin]" in line:
+				print_str = ""
+				for i in range (0,level):
+					print_str += "\t"
+				if root:
+					name = (line.split("$$")[2]).rstrip()
+					prev_child = root.has_child(name)
+					if prev_child != None:
+						prev_child.num_calls += 1
+						print_str += "<" + str(level) + ">: (" + str(prev_child.num_calls) + ")" + prev_child.name + " Parent: " + prev_child.parent.name
+						root = prev_child
+					else:
+						child = Node(name,1,root,[],0,0)
+						root.add_child(child)
+						print_str += "<" + str(level) + ">: (" + str(child.num_calls) + ")" + child.name + " Parent: " + child.parent.name
+						root = child
+					#print print_str
+					
+				else:
+					name = (line.split("$$")[2]).rstrip()
+					prev_root = has_root(name, roots)
+					if prev_root != None:
+						prev_root.num_calls += 1
+						print_str = "<" + str(level) + ">: (" + str(prev_root.num_calls) + ")" + prev_root.name
+						root = prev_root
+					else:
+						root = Node(name,1,None,[],0,0)
+						roots.append(root)
+						print_str = "<" + str(level) + ">: (" + str(root.num_calls) + ")" + root.name
+					#print print_str
+				root.start_time = float((line.split("$$")[1]).rstrip())
+				level += 1
+			elif "[Call  end ]" in line :
+				end_time = float((line.split("$$")[1]).rstrip())
+				new_ex_time = end_time - root.start_time
+				root.update_ex_time(new_ex_time)
+				root = root.parent
+				level -= 1
 
 print "Tree Built!"
 print ""
