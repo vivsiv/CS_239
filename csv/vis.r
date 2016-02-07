@@ -50,6 +50,6 @@ order.exe_time_asc <- order(data$Avg_Execution_Time)
 sorted_exe_time_asc <- data[order.exe_time_asc,]
 sorted_call_stack_exe_asc <- sorted_exe_time_asc[sorted_exe_time_asc$Parent_Name == "None",]
 fastest_call_stack <- head(sorted_call_stack_exe_asc,10)
-plt5 <- barplot(fastest_call_stack$Avg_Execution_Time,main="Top 10 Slowest Call Stacks",ylab="Avg Ex Time (usec)")
+plt5 <- barplot(fastest_call_stack$Avg_Execution_Time,main="Top 10 Fastest Call Stacks",ylab="Avg Ex Time (usec)")
 text(plt5, par("usr")[3], labels = fastest_call_stack$Function_Name, srt = 45, adj = c(1,1.1), xpd = TRUE, cex=0.8)
 text(plt5, fastest_call_stack$Avg_Execution_Time, labels = round(fastest_call_stack$Avg_Execution_Time,1), pos = 3, cex=0.5)
