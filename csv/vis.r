@@ -1,7 +1,7 @@
 data <- read.csv(file="batch_out.csv",sep=",",head=TRUE)
 
 # par(mfrow = c(2,2))
-par(mfrow = c(2,2),mar=c(8.5,6.5,2,2))
+par(mfrow = c(2,3),mar=c(8.5,6.5,2,2))
 #Bar plot for top 10 fastest methods
 order.exe_time_asc <- order(data$Avg_Execution_Time)
 sorted_exe_time_asc <- data[order.exe_time_asc,]
@@ -35,3 +35,21 @@ most_call_stack <- head(call_stack_desc,10)
 plt4 <- barplot(most_call_stack$Num_Calls,main="Top 10 Frequent Call Stacks",ylab="Number of Calls")
 text(plt4, par("usr")[3], labels = most_call_stack$Function_Name, srt = 45, adj = c(1,1.1), xpd = TRUE, cex=0.8)
 text(plt4, most_call_stack$Num_Calls, labels = round(most_call_stack$Num_Calls,1), pos = 3, cex=0.5)
+
+#Bar plot for top 10 slowest call stacks
+order.exe_time_desc <- order(data$Avg_Execution_Time, decreasing=TRUE)
+sorted_exe_time_desc <- data[order.exe_time_desc,]
+sorted_call_stack_exe_desc <- sorted_exe_time_desc[sorted_exe_time_desc$Parent_Name == "None",]
+slowest_call_stack <- head(sorted_call_stack_exe_desc,10)
+plt5 <- barplot(slowest_call_stack$Avg_Execution_Time,main="Top 10 Slowest Call Stacks",ylab="Avg Ex Time (usec)")
+text(plt5, par("usr")[3], labels = slowest_call_stack$Function_Name, srt = 45, adj = c(1,1.1), xpd = TRUE, cex=0.8)
+text(plt5, slowest_call_stack$Avg_Execution_Time, labels = round(slowest_call_stack$Avg_Execution_Time,1), pos = 3, cex=0.5)
+
+#Bar plot for top 10 fastest call stacks
+order.exe_time_asc <- order(data$Avg_Execution_Time)
+sorted_exe_time_asc <- data[order.exe_time_asc,]
+sorted_call_stack_exe_asc <- sorted_exe_time_asc[sorted_exe_time_asc$Parent_Name == "None",]
+fastest_call_stack <- head(sorted_call_stack_exe_asc,10)
+plt5 <- barplot(fastest_call_stack$Avg_Execution_Time,main="Top 10 Slowest Call Stacks",ylab="Avg Ex Time (usec)")
+text(plt5, par("usr")[3], labels = fastest_call_stack$Function_Name, srt = 45, adj = c(1,1.1), xpd = TRUE, cex=0.8)
+text(plt5, fastest_call_stack$Avg_Execution_Time, labels = round(fastest_call_stack$Avg_Execution_Time,1), pos = 3, cex=0.5)
