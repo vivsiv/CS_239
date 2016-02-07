@@ -1,5 +1,6 @@
 data <- read.csv(file="batch_out.csv",sep=",",head=TRUE)
 
+par(mfrow = c(2,2))
 #Bar plot for top 10 fastest methods
 order.exe_time_asc <- order(data$Avg_Execution_Time)
 sorted_exe_time_asc <- data[order.exe_time_asc,]
