@@ -1,10 +1,19 @@
 data <- read.csv(file="batch_out.csv",sep=",",head=TRUE)
 
 #Bar plot for top 10 fastest methods
-order.avg_exe_time <- order(data$Avg_Execution_Time)
-sorted_avg_exe <- data[order.avg_exe_time,]
-top_10_avg_exe <- head(sorted_avg_exe,10)
-barplot(top_10_avg_exe$Avg_Execution_Time,main="Top 10 Fastest Methods",xlab="Function Name",names.arg=top_10_avg_exe$Function_Name,ylab="Avg Ex Time (usec)")
+order.exe_time_asc <- order(data$Avg_Execution_Time)
+sorted_exe_time_asc <- data[order.exe_time_asc,]
+fastest_exe_time <- head(sorted_exe_time_asc,10)
+barplot(fastest_exe_time$Avg_Execution_Time,main="Top 10 Fastest Methods",xlab="Function Name",names.arg=fastest_exe_time$Function_Name,ylab="Avg Ex Time (usec)",cex.names=0.75,las=2)
 
-#plot(data$Function_Name,data$Avg_Execution_Time,xlab="Function Name",ylab="Avg Ex Time (usec)")
-#plot(data$Call_Stack,data$Avg_Execution_Time,xlab="Call Stack",ylab="Avg Ex Time (usec)")
+#Bar plot for 10 slowest methods
+order.exe_time_desc <- order(data$Avg_Execution_Time, decreasing=TRUE)
+sorted_exe_time_desc <- data[order.exe_time_desc,]
+slowest_exe_time <- head(sorted_exe_time_desc,10)
+barplot(slowest_exe_time$Avg_Execution_Time,main="Top 10 Slowest Methods",xlab="Function Name",names.arg=slowest_exe_time$Function_Name,ylab="Avg Ex Time (usec)",cex.names=0.75,las=2)
+
+#Bar plot for top 10 most frequent call stacks
+# order.call_stack_desc <- order(data$Avg_Execution_Time, decreasing=TRUE)
+# sorted_exe_time_desc <- data[order.exe_time_desc,]
+# slowest_exe_time <- head(sorted_exe_time_desc,10)
+# barplot(slowest_exe_time$Avg_Execution_Time,main="Top 10 Slowest Methods",xlab="Function Name",names.arg=slowest_exe_time$Function_Name,ylab="Avg Ex Time (usec)",cex.names=0.75,las=2)
