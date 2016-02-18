@@ -46,7 +46,7 @@ class ASM_Instrument_Tool {
 
 			ClassReader reader = new ClassReader(input_bytecode);
 			//TraceClassWriter writer = new TraceClassWriter(TraceClassWriter.COMPUTE_FRAMES, ASM_Instrument_Tool.class.getClassLoader());
-			ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+			ClassWriter writer = new ClassWriter(TraceClassWriter.COMPUTE_FRAMES);
 
 			//********************************************************************************
 			// wrap ClassWriter using MyClassVisitor
@@ -156,6 +156,7 @@ class MyMethodVisitor extends MethodVisitor implements Opcodes {
 	public LocalVariablesSorter lvs;
 	public AnalyzerAdapter aa;
 	private int timestampID;
+	private int threadstampID;
 	private int maxStack;
 
 	public MyMethodVisitor(MethodVisitor mv) {
@@ -168,21 +169,31 @@ class MyMethodVisitor extends MethodVisitor implements Opcodes {
 
 		// Allocate an empty space in the stack and assign it with a new ID.
 		timestampID = lvs.newLocal(Type.LONG_TYPE);
+		threadstampID = lvs.newLocal(Type.LONG_TYPE);
 		maxStack = 4;
 	}
 
 	@Override
 	// Currently do nothing but invoke the visitMethodInsn method of its base class
 	public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-		// Print out the method name and current timestamp when entering the method
+		// Get the thread ID associated with current method.
+		mv.visitMethodInsn(INVOKESTATIC, "java/lang/Thread", "currentThread", "()Ljava/lang/Thread;", false);
+		mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Thread", "getId", "()J", false);
+		mv.visitVarInsn(LSTORE, threadstampID);
+		// Get current system timestamp.
 		mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "nanoTime", "()J", false); // Invoke nanoTime() to get current system timestamp.
 		mv.visitVarInsn(LSTORE, timestampID);   // Store the timestamp into the newly allocated variable.
-		// Below code is to prepare for the System.out.println()
+		// Below code is the preparation for System.out.println().
 		mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
 		mv.visitTypeInsn(NEW, "java/lang/StringBuilder");
 		mv.visitInsn(DUP);
 		mv.visitMethodInsn(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
 		mv.visitLdcInsn("[Call begin]$$");
+		mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+		mv.visitVarInsn(LLOAD, threadstampID);
+		mv.visitMethodInsn(INVOKESTATIC, "java/lang/Long", "toString", "(J)Ljava/lang/String;", false);
+		mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+		mv.visitLdcInsn("$$");
 		mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
 		mv.visitVarInsn(LLOAD, timestampID);
 		mv.visitMethodInsn(INVOKESTATIC, "java/lang/Long", "toString", "(J)Ljava/lang/String;", false);
@@ -195,15 +206,24 @@ class MyMethodVisitor extends MethodVisitor implements Opcodes {
 		// Continue parsing...
 		mv.visitMethodInsn(opcode, owner, name, desc, itf);
 
-		// Print out the method name and current timestamp when exiting the method
+		// Get the thread ID associated with current method.
+		mv.visitMethodInsn(INVOKESTATIC, "java/lang/Thread", "currentThread", "()Ljava/lang/Thread;", false);
+		mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Thread", "getId", "()J", false);
+		mv.visitVarInsn(LSTORE, threadstampID);
+		// Get current system timestamp.
 		mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "nanoTime", "()J", false); // Invoke nanoTime() to get current system timestamp.
 		mv.visitVarInsn(LSTORE, timestampID);   // Store the timestamp into the newly allocated variable.
-		// Below code is to prepare for the System.out.println()
+		// Below code is the preparation for System.out.println().
 		mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
 		mv.visitTypeInsn(NEW, "java/lang/StringBuilder");
 		mv.visitInsn(DUP);
 		mv.visitMethodInsn(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
 		mv.visitLdcInsn("[Call  end ]$$");
+		mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+		mv.visitVarInsn(LLOAD, threadstampID);
+		mv.visitMethodInsn(INVOKESTATIC, "java/lang/Long", "toString", "(J)Ljava/lang/String;", false);
+		mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+		mv.visitLdcInsn("$$");
 		mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
 		mv.visitVarInsn(LLOAD, timestampID);
 		mv.visitMethodInsn(INVOKESTATIC, "java/lang/Long", "toString", "(J)Ljava/lang/String;", false);
