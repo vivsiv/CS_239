@@ -1,4 +1,4 @@
-data <- read.csv(file="batch_out.csv",sep=",",head=TRUE)
+data <- read.csv(file="myClass_out.csv",sep=",",head=TRUE)
 
 # par(mfrow = c(2,2))
 par(mfrow = c(2,3),mar=c(8.5,6.5,2,2))
@@ -26,6 +26,15 @@ most_num_calls <- head(sorted_num_calls_desc,10)
 plt3 <- barplot(most_num_calls$Num_Calls,main="Top 10 Frequent Methods",ylab="Number of Calls")
 text(plt3, par("usr")[3], labels = most_num_calls$Function_Name, srt = 45, adj = c(1,1.1), xpd = TRUE, cex=0.8)
 text(plt3, most_num_calls$Num_Calls, labels = round(most_num_calls$Num_Calls,1), pos = 3, cex=0.5)
+
+#Bar plot for top 10 most frequent call stacks
+order.num_calls_desc <- order(data$Num_Calls, decreasing=TRUE)
+sorted_num_calls_desc <- data[order.num_calls_desc,]
+call_stack_desc <- sorted_num_calls_desc[sorted_num_calls_desc$Parent_Name == "None",]
+most_call_stack <- head(call_stack_desc,10)
+plt4 <- barplot(most_call_stack$Num_Calls,main="Top 10 Frequent Call Stacks",ylab="Number of Calls")
+text(plt4, par("usr")[3], labels = most_call_stack$Function_Name, srt = 45, adj = c(1,1.1), xpd = TRUE, cex=0.8)
+text(plt4, most_call_stack$Num_Calls, labels = round(most_call_stack$Num_Calls,1), pos = 3, cex=0.5)
 
 #Bar plot for top 10 most frequent call stacks
 order.num_calls_desc <- order(data$Num_Calls, decreasing=TRUE)
