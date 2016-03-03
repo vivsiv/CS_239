@@ -10,7 +10,7 @@ for line in open(sys.argv[1], 'r'):
 			line_string += "\t"
 
 		line_string += ": ".join(line.split("$$"))
-		print line_string.rstrip()
+		print (line_string.rstrip())
 
 		if ('[Call begin]' in line): 
 			num_tabs += 1

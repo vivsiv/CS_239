@@ -35,7 +35,7 @@ def has_root(node_name,root_arr):
 			return r
 	return None
 
-print "Building Tree..."
+print ("Building Tree...")
 roots = []
 root = None
 level = 0
@@ -43,6 +43,9 @@ inst_dir = sys.argv[1]
 for log_file in os.listdir(inst_dir):
 	if log_file.endswith(".txt"):
 		file_path = inst_dir + '/' + log_file
+		root = None
+		level = 0
+
 		for line in open(file_path, 'r'):
 			if "[Call begin]" in line:
 				print_str = ""
@@ -83,6 +86,7 @@ for log_file in os.listdir(inst_dir):
 				root = root.parent
 				level -= 1
 
+"""
 print "Tree Built!"
 print ""
 
@@ -90,16 +94,17 @@ print "Tree Roots"
 for r in roots:
 	print r.name
 print ""
+"""
 
 def dfs(node, level, call_stack, csvwriter):
 	if node == None:
 		return
 
- 	print_str = ""
+	print_str = ""
 	for i in range (0,level):
 		print_str += "\t"
 	print_str += node.node_string(level)
-	print print_str
+	#print print_str
 
 	csv_row = ["<L" + str(level) + ">" + node.name,node.num_calls,node.avg_ex_time_us(),call_stack]
 	if node.parent != None:
@@ -113,12 +118,12 @@ def dfs(node, level, call_stack, csvwriter):
 		dfs(child, level+1, call_stack, csvwriter)
 
 csv_out = sys.argv[2]
-print "Parsing Tree..."
-with open(csv_out, 'wb') as csvfile:
+print ("Parsing Tree...")
+with open(csv_out, 'w') as csvfile:
 	treewriter = csv.writer(csvfile, quotechar='"')
 	treewriter.writerow(['Function_Name','Num_Calls','Avg_Execution_Time','Call_Stack','Parent_Name','Num_Children'])
 	for node in roots:
 		dfs(node,0,"<L0>"+node.name,treewriter)
-print "Tree Parsed"
+print ("Tree Parsed")
 
 
