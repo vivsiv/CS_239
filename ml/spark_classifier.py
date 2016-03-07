@@ -49,54 +49,73 @@ def bayes_classifier(features,train):
 	return model
 
 def grid_search(features,train,predict):
-	models = [
-	    (sklearn.linear_model.LogisticRegression(),[{'C':[0.01,.1,.5]}]),
-	    (sklearn.ensemble.RandomForestClassifier(),[{'n_estimators':[1,5,10]}]),
-	    (sklearn.naive_bayes.BernoulliNB(),[{'alpha':[0,0.5,1.0]}])
-	]
-	print models
-	best_models = []
-	best_scores = []
+	models = {
+	    "linear":(sklearn.linear_model.LogisticRegression(),[{'C':[0.01,.1,.5]}]),
+	    "tree":(sklearn.ensemble.RandomForestClassifier(),[{'n_estimators':[1,5,10]}]),
+	    "bayes":(sklearn.naive_bayes.BernoulliNB(),[{'alpha':[0,0.5,1.0]}])
+	}
+
+	# best_models = []
+	# best_scores = []
 	grid_searches = {}
-	for model_info in models:
+	for model_name,model_info in models.iteritems():
+		print model_name
 		model = model_info[0]
 		params = model_info[1]
 		grid_model = sklearn.grid_search.GridSearchCV(model,params,verbose=5,n_jobs=1,cv=2)
 		grid_model.fit(train[features], train["pass/fail"])
+		grid_searches[model_name] = grid_model
 
-    	print("Our best score here:", grid_model.best_score_)
-    	print("Our best params here:",grid_model.best_params_)
-    	best_scores.append(grid_model.best_score_)
-    	best_models.append(grid_model)
+    	# print("Our best score here:", grid_model.best_score_)
+    	# print("Our best params here:",grid_model.best_params_)
+    	# best_scores.append(grid_model.best_score_)
+    	# best_models.append(grid_model)
 
-    	for params, mean_score, scores in grid_model.grid_scores_:
-        	print("%0.3f (+/-%0.03f) for %r" % (mean_score, scores.std() * 2, params))
+	best_model = None
+	best_score = 0
+	for name,gs in grid_searches.iteritems():
+		print "Model: " + name + ", Best Score: " + str(gs.best_score_)
+		if gs.best_score_ > best_score:
+			best_score = gs.best_score_
+			best_model = gs
+	return best_model
 
-	print best_scores
-	return best_models[numpy.argmax(best_scores)]
+	# print best_scores
+	# return best_models[numpy.argmax(best_scores)]
 
 def grid_search_spark(sc,features,train,predict):
-	models = [
-	    (sklearn.linear_model.LogisticRegression(),[{'C':[0.01,.1,.5]}]),
-	    (sklearn.naive_bayes.BernoulliNB(),[{'alpha':[0,0.5,1.0]}]),
-	    (sklearn.ensemble.RandomForestClassifier(),[{'n_estimators':[1,5,10]}])
-	]
-	print models
+	models = {
+	    "linear":(sklearn.linear_model.LogisticRegression(),[{'C':[0.01,.1,.5]}]),
+	    "tree":(sklearn.ensemble.RandomForestClassifier(),[{'n_estimators':[1,5,10]}]),
+	    "bayes":(sklearn.naive_bayes.BernoulliNB(),[{'alpha':[0,0.5,1.0]}])
+	}
+
 	best_models = []
 	best_scores = []
-	for model_info in models:
+	grid_searches = {}
+	for model_name,model_info in models.iteritems():
 		model = model_info[0]
 		params = model_info[1]
 		grid_model = spark_sklearn.GridSearchCV(sc,model,params,verbose=5,cv=2)
 		grid_model.fit(train[features], train["pass/fail"])
+		grid_searches[model_name] = grid_model
 
-    	print("Our best score here:", grid_model.best_score_)
-    	print("Our best params here:",grid_model.best_params_)
-    	best_scores.append(grid_model.best_score_)
-    	best_models.append(grid_model)
+    	# print("Our best score here:", grid_model.best_score_)
+    	# print("Our best params here:",grid_model.best_params_)
+    	# best_scores.append(grid_model.best_score_)
+    	# best_models.append(grid_model)
 
-	print best_scores
-	return best_models[numpy.argmax(best_scores)]
+	best_model = None
+	best_score = 0
+	for name,gs in grid_searches.iteritems():
+		print "Model: " + name + ", Best Score: " + str(gs.best_score_)
+		if gs.best_score_ > best_score:
+			best_score = gs.best_score_
+			best_model = gs
+	return best_model
+
+	# print best_scores
+	# return best_models[numpy.argmax(best_scores)]
 
 def predict(model,predict_data,features):
 	predictions = model.predict(predict_data[features])
