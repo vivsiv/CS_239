@@ -81,7 +81,7 @@ def grid_search(features,train,predict):
 def grid_search_spark(sc,features,train,predict):
 	models = {
 	    "linear":(sklearn.linear_model.LogisticRegression(),[{'C':[0.01,.1,.5]}]),
-	    "tree":(sklearn.ensemble.RandomForestClassifier(),[{'n_estimators':[1,5,10]}]),
+	    "tree":(sklearn.ensemble.RandomForestClassifier(),[{'n_estimators':[1,2,4,8]}]),
 	    "bayes":(sklearn.naive_bayes.BernoulliNB(),[{'alpha':[0,0.5,1.0]}])
 	}
 
