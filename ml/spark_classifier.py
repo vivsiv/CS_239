@@ -5,19 +5,18 @@ import sklearn.linear_model
 import pandas
 from sklearn import grid_search
 
-import spark_sklearn
-from spark_sklearn import GridSearchCV
-from pyspark import SparkContext
+# import spark_sklearn
+# from spark_sklearn import GridSearchCV
+# from pyspark import SparkContext
 
 import os
 import sys
 import csv
 import math
 
-sc = SparkContext("local","Metric Classifier")
-
 test_csv = sys.argv[1]
 pct_train = float(sys.argv[2])
+classifier = sys.argv[3]
 
 all_data = pandas.read_csv(test_csv)
 end_train = int(math.floor(pct_train * len(all_data)))
@@ -60,8 +59,6 @@ def grid_search(sc,features,train,predict):
     	best_models.append(grid_model)
 
 	return best_models[numpy.argmax(best_scores)]
-	# predictions = final_model.predict(predict[features])
-	# print predictions
 
 def predict(model,predict_data,features):
 	predictions = model.predict(predict_data[features])
@@ -75,7 +72,16 @@ def predict(model,predict_data,features):
 	correct = [i for i, j in zip(predict_data["pass/fail"], predictions) if i == j]
 	print ("Percent Correct %f" % (float(len(correct))/len(predictions)))
 
-#best_model = forest_classifier(features,train_data)
-#best_model = logistic_classifier(features,train_data)
-best_model = grid_search(sc,features,train_data,predict_data)
-predict(best_model,predict_data,features)
+model = None
+if classifier == "tree":
+	model = forest_classifier(features,train_data)
+elif classifier == "linear":
+	model = logistic_classifier(features,train_data)
+else:
+	import spark_sklearn
+	from spark_sklearn import GridSearchCV
+	from pyspark import SparkContext 
+	model = grid_search(sc,features,train_data,predict_data)
+	sc = SparkContext("local","Metric Classifier")
+
+predict(model,predict_data,features)
