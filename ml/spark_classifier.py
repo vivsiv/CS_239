@@ -6,10 +6,6 @@ import sklearn.naive_bayes
 import pandas
 from sklearn import grid_search
 
-# import spark_sklearn
-# from spark_sklearn import GridSearchCV
-# from pyspark import SparkContext
-
 import os
 import sys
 import csv
@@ -59,7 +55,6 @@ def grid_search(features,train,predict):
 	# best_scores = []
 	grid_searches = {}
 	for model_name,model_info in models.iteritems():
-		print model_name
 		model = model_info[0]
 		params = model_info[1]
 		grid_model = sklearn.grid_search.GridSearchCV(model,params,verbose=5,n_jobs=1,cv=2)
