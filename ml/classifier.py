@@ -134,6 +134,7 @@ def classify(test_csv,pct_train,classifier,sc=None):
 		model_info = grid_search_spark(sc,features,train_data,predict_data)
 	else:
 		print "ERROR. Classifier <{0}> not supported".format(classifier)
+		exit(1)
 
 	predict(model_info,predict_data,features)
 	test_name = (test_csv.split(".")[0]).split("/")[1]
