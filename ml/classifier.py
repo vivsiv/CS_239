@@ -1,15 +1,29 @@
-import numpy as numpy
+import numpy
+
 import sklearn
+
 import sklearn.ensemble
 import sklearn.linear_model
 import sklearn.naive_bayes
+import sklearn.feature_selection
+import sklearn.grid_search
+
 import pandas
-from sklearn import grid_search
 
 import os
 import sys
 import csv
 import math
+
+def feature_selection(all_features,train,n_features=5):
+	print "Using {0} BEST Features".format(n_features)
+	selector = sklearn.feature_selection.SelectKBest(sklearn.feature_selection.f_classif,n_features)
+	selector_out = selector.fit(train[all_features],train["pass/fail"])
+	# print selector_out.get_support()
+	selections = [feature for feature, selected in zip(all_features, selector_out.get_support()) if selected]
+	# print selections
+	return selections
+
 
 def forest_classifier(features,train,n_trees=1,cv_folds=2):
 	model = sklearn.ensemble.RandomForestClassifier(n_estimators=n_trees)
@@ -39,8 +53,6 @@ def grid_search(features,train,predict,cv_folds=2):
 	    "bayes":(sklearn.naive_bayes.BernoulliNB(),[{'alpha':[0,0.5,1.0]}])
 	}
 
-	# best_models = []
-	# best_scores = []
 	grid_searches = {}
 	for model_name,model_info in models.iteritems():
 		model = model_info[0]
@@ -48,11 +60,6 @@ def grid_search(features,train,predict,cv_folds=2):
 		grid_model = sklearn.grid_search.GridSearchCV(model,params,verbose=5,n_jobs=1,cv=cv_folds)
 		grid_model.fit(train[features], train["pass/fail"])
 		grid_searches[model_name] = grid_model
-
-    	# print("Our best score here:", grid_model.best_score_)
-    	# print("Our best params here:",grid_model.best_params_)
-    	# best_scores.append(grid_model.best_score_)
-    	# best_models.append(grid_model)
 
 	best_model = None
 	best_score = 0
@@ -63,9 +70,6 @@ def grid_search(features,train,predict,cv_folds=2):
 			best_model = gs.best_estimator_
 	print "Best Model {0}".format(best_model)
 	return {"model":best_model,"cv_score":best_score}
-
-	# print best_scores
-	# return best_models[numpy.argmax(best_scores)]
 
 def grid_search_spark(sc,features,train,predict,cv_folds=2):
 	import spark_sklearn
@@ -107,19 +111,26 @@ def predict(model_info,predict_data,features):
 		"prediction": predictions
 	})
 	print result
+	print
 
 	correct = [i for i, j in zip(predict_data["pass/fail"], predictions) if i == j]
 	pct_correct = (float(len(correct))/len(predictions))
-	print ("Percent Correct %f" % pct_correct)
+	print ("PERCENT CORRECT: %f" % pct_correct)
 	model_info["pct_correct"] = pct_correct
 
-def classify(test_csv,pct_train,classifier,sc=None):
+def classify(test_csv,pct_train,classifier,sc=None,select_features=False):
 	all_data = pandas.read_csv(test_csv)
 	end_train = int(math.floor(pct_train * len(all_data)))
 	train_data = all_data[:end_train]
 	predict_data = all_data[end_train:]
 	headers = list(all_data.columns.values)
 	features = headers[1:-1]
+
+	if select_features:
+		features = feature_selection(features,train_data)
+
+	print "Using Features: {0}".format(features)
+	print 
 
 	model_info = None
 	if classifier == "tree":
@@ -138,6 +149,8 @@ def classify(test_csv,pct_train,classifier,sc=None):
 
 	predict(model_info,predict_data,features)
 	test_name = (test_csv.split(".")[0]).split("/")[1]
+	if select_features:
+		test_name += "_fs"
 	return [test_name,model_info["cv_score"],model_info["pct_correct"]]
 
 def main():
@@ -164,10 +177,19 @@ def main():
 		writer.writerow(["feature_name","model_score","percent_correct"])
 		for test_file in os.listdir(input_dir):
 			if test_file.endswith(".csv"):
+				print "----- START FEATURE CATEGORY: {0} -----".format(test_file.split(".")[0])
+				print "Using ALL Features"
 				test_csv = "{0}/{1}".format(input_dir,test_file)
-				result_row = classify(test_csv,pct_train,classifier,sc)
-				print result_row
-				writer.writerow(result_row)
+				result_row_all = classify(test_csv,pct_train,classifier,sc)
+				print "Result Row {0}".format(result_row_all)
+				writer.writerow(result_row_all)
+				print
+
+				result_row_selections = classify(test_csv,pct_train,classifier,sc,True)
+				print  "Result Row {0}".format(result_row_selections)
+				writer.writerow(result_row_selections)
+				print "----- END FEATURE CATEGORY: {0} -----".format(result_row_all[0])
+				print 
 
 if __name__ == "__main__":
     main()
