@@ -1,7 +1,6 @@
 import numpy
 
 import sklearn
-
 import sklearn.ensemble
 import sklearn.linear_model
 import sklearn.naive_bayes
@@ -159,12 +158,14 @@ def main():
 		input_dir = sys.argv[1]
 		pct_train = float(sys.argv[2])
 		classifier = sys.argv[3]
+		out_csv = sys.argv[4]
 	except:
-		print "ERROR, Usage: python classifier.py <input_dir> <pct_train> <classifier>"
+		print "ERROR, Usage: python classifier.py <input_dir> <pct_train> <classifier> <out_csv>"
 		print "\t<input_dir> Directory containing test case csv's"
 		print "\t<pct_train> Percentage of csv to use as training data (0,1)"
 		print "\t<classifier> Type of classifier to use: tree, linear, bayes, grid, spark"
-		print "\t<To use spark: spark-submit classifier.py <input_dir> <pct_train> spark"
+		print "\t<out_csv> name of the out_csv"
+		print "\t<To use spark: spark-submit classifier.py <input_dir> <pct_train> spark <out_csv>"
 		exit(1)
 
 	sc = None
@@ -172,7 +173,7 @@ def main():
 		from pyspark import SparkContext
 		sc = SparkContext("local","Metric Classifier")
 
-	with open("classifier_results.csv", "w") as csvOutput:
+	with open(out_csv, "w") as csvOutput:
 		writer = csv.writer(csvOutput, delimiter=',', quotechar='"')
 		writer.writerow(["feature_name","model_score","percent_correct"])
 		for test_file in os.listdir(input_dir):
