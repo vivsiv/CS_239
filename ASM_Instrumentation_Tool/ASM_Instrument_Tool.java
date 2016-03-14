@@ -1,5 +1,6 @@
 // Import core library
 import java.io.*;
+import java.util.*;
 
 // Import ASM Library
 import org.objectweb.asm.*;
@@ -31,8 +32,8 @@ class ASM_Instrument_Tool {
 		stopTime = System.currentTimeMillis();
 
 		System.out.println("*Summary*");
-		System.out.println(">>Total instrumented class: " + Integer.toString(classCount));
-		System.out.println(">>Total instrumented time: " + Long.toString(stopTime - startTime) + " ms");
+		System.out.println(" >>Total instrumented class: " + Integer.toString(classCount));
+		System.out.println(" >>Total instrumented time: " + Long.toString(stopTime - startTime) + " ms");
 	}
 
 	public static void instrumentByteCode(String inputFile, String outputFile) {
@@ -121,16 +122,12 @@ class MyClassVisitor extends ClassVisitor implements Opcodes {
 
 		// Instantiate a customized MethodVisitor
 		if (!isInterface && mv != null) {
-			MyMethodVisitor at = new MyMethodVisitor(mv);
+			MyMethodVisitor at = new MyMethodVisitor(mv, name);
 
 			at.aa = new AnalyzerAdapter(owner, access, name, desc, at);
 			at.lvs = new LocalVariablesSorter(access, desc, at.aa);
 			
 			return at.lvs;
-		}
-
-		if (mv == null) {
-			return null;
 		}
 
 		return mv;
@@ -139,10 +136,6 @@ class MyClassVisitor extends ClassVisitor implements Opcodes {
 	@Override
 	public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
 		FieldVisitor fv = cv.visitField(access, name, desc, signature, value);
-
-		if (fv == null) {
-			return null;
-		}
 
 		return fv;
 	}
@@ -155,12 +148,17 @@ class MyClassVisitor extends ClassVisitor implements Opcodes {
 class MyMethodVisitor extends MethodVisitor implements Opcodes {
 	public LocalVariablesSorter lvs;
 	public AnalyzerAdapter aa;
+	private Map<String, Boolean> exceptionLabels;
+	private String methodName;
 	private int timestampID;
 	private int threadstampID;
 	private int maxStack;
 
-	public MyMethodVisitor(MethodVisitor mv) {
+	public MyMethodVisitor(MethodVisitor mv, String methodName) {
 		super(ASM5, mv);
+		
+		this.methodName = methodName;
+		exceptionLabels = new HashMap<String, Boolean>();
 	}
 
 	@Override
@@ -176,6 +174,7 @@ class MyMethodVisitor extends MethodVisitor implements Opcodes {
 	@Override
 	// Currently do nothing but invoke the visitMethodInsn method of its base class
 	public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
+
 		// Get the thread ID associated with current method.
 		mv.visitMethodInsn(INVOKESTATIC, "java/lang/Thread", "currentThread", "()Ljava/lang/Thread;", false);
 		mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Thread", "getId", "()J", false);
@@ -235,6 +234,49 @@ class MyMethodVisitor extends MethodVisitor implements Opcodes {
 
 		// Adjust max stack size    
 		maxStack = Math.max(aa.stack.size() + 4, maxStack);
+	}
+
+	@Override
+	public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
+		// Put the label of catch block into the map
+		exceptionLabels.put(handler.toString(), true);
+
+		mv.visitTryCatchBlock(start, end, handler, type);
+
+	}
+
+	@Override
+	public void visitLabel(Label label) {
+		mv.visitLabel(label);
+
+		// If the visiting label is in the map (such label corresponds to a catch block)
+		if (exceptionLabels.containsKey(label.toString())) {
+			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Thread", "currentThread", "()Ljava/lang/Thread;", false);
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Thread", "getId", "()J", false);
+			mv.visitVarInsn(LSTORE, threadstampID);
+			// Get current system timestamp.
+			mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "nanoTime", "()J", false); // Invoke nanoTime() to get current system timestamp.
+			mv.visitVarInsn(LSTORE, timestampID);   // Store the timestamp into the newly allocated variable.
+			// Below code is the preparation for System.out.println().
+			mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+			mv.visitTypeInsn(NEW, "java/lang/StringBuilder");
+			mv.visitInsn(DUP);
+			mv.visitMethodInsn(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
+			mv.visitLdcInsn("[Exception ]$$");
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+			mv.visitVarInsn(LLOAD, threadstampID);
+			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Long", "toString", "(J)Ljava/lang/String;", false);
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+			mv.visitLdcInsn("$$");
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+			mv.visitVarInsn(LLOAD, timestampID);
+			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Long", "toString", "(J)Ljava/lang/String;", false);
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+			mv.visitLdcInsn("$$" + methodName);
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+		}
 	}
 
 	@Override
