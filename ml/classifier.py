@@ -24,28 +24,28 @@ def feature_selection(all_features,train,n_features=5):
 	return selections
 
 
-def forest_classifier(features,train,n_trees=1,cv_folds=2):
+def forest_classifier(features,train,n_trees=1,cv_folds=4):
 	model = sklearn.ensemble.RandomForestClassifier(n_estimators=n_trees)
 	scores = sklearn.cross_validation.cross_val_score(model, train[features], train["pass/fail"], cv=cv_folds)
 	print "Forest. Average Score over {0} folds is: {1}".format(cv_folds,scores.mean())
 	model.fit(train[features],train["pass/fail"])
 	return {"model":model,"cv_score":scores.mean()}
 
-def logistic_classifier(features,train,cv_folds=2):
+def logistic_classifier(features,train,cv_folds=4):
 	model = sklearn.linear_model.LogisticRegression()
 	scores = sklearn.cross_validation.cross_val_score(model, train[features], train["pass/fail"], cv=cv_folds)
 	print "Logistic. Average Score over {0} folds: {1}".format(cv_folds, scores.mean())
 	model.fit(train[features],train["pass/fail"])
 	return {"model":model,"cv_score":scores.mean()}
 
-def bayes_classifier(features,train,cv_folds=2):
+def bayes_classifier(features,train,cv_folds=4):
 	model = sklearn.naive_bayes.BernoulliNB()
 	scores = sklearn.cross_validation.cross_val_score(model, train[features], train["pass/fail"], cv=cv_folds)
 	print "Logistic. Average Score over {0} folds: {1}".format(cv_folds, scores.mean())
 	model.fit(train[features],train["pass/fail"])
 	return {"model":model,"cv_score":scores.mean()}
 
-def grid_search(features,train,predict,cv_folds=2):
+def grid_search(features,train,predict,cv_folds=4):
 	models = {
 	    "linear":(sklearn.linear_model.LogisticRegression(),[{'C':[0.01,.1,.5]}]),
 	    "tree":(sklearn.ensemble.RandomForestClassifier(),[{'n_estimators':[1,5,10]}]),
@@ -70,7 +70,7 @@ def grid_search(features,train,predict,cv_folds=2):
 	print "Best Model {0}".format(best_model)
 	return {"model":best_model,"cv_score":best_score}
 
-def grid_search_spark(sc,features,train,predict,cv_folds=2):
+def grid_search_spark(sc,features,train,predict,cv_folds=4):
 	import spark_sklearn
 	models = {
 	    "linear":(sklearn.linear_model.LogisticRegression(),[{'C':[0.01,.1,.5]}]),
@@ -149,7 +149,7 @@ def classify(test_csv,pct_train,classifier,sc=None,select_features=False):
 	predict(model_info,predict_data,features)
 	test_name = (test_csv.split(".")[0]).split("/")[1]
 	if select_features:
-		test_name += "_fs"
+		test_name += "_feature_eng"
 	return [test_name,model_info["cv_score"],model_info["pct_correct"]]
 
 def main():
